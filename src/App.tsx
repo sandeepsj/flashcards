@@ -6,22 +6,23 @@ import { Toaster } from "sonner"
 import { router } from "@/routes/router"
 import { useUIStore } from "@/stores/uiStore"
 import { applyTheme, watchSystemTheme } from "@/lib/theme"
-import { extractTokenFromHash, handleToken } from "@/lib/googleAuth"
+import { handleToken } from "@/lib/googleAuth"
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ""
 
-export default function App() {
-  const theme = useUIStore((s) => s.theme)
-  const [loading, setLoading] = useState(false)
+interface AppProps {
+  initialToken: string | null
+}
 
-  // Handle OAuth redirect BEFORE router mounts
+export default function App({ initialToken }: AppProps) {
+  const theme = useUIStore((s) => s.theme)
+  const [loading, setLoading] = useState(!!initialToken)
+
   useEffect(() => {
-    const token = extractTokenFromHash()
-    if (token) {
-      setLoading(true)
-      handleToken(token).finally(() => setLoading(false))
+    if (initialToken) {
+      handleToken(initialToken).finally(() => setLoading(false))
     }
-  }, [])
+  }, [initialToken])
 
   useEffect(() => {
     applyTheme(theme)
