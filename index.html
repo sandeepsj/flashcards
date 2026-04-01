@@ -8,6 +8,22 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Extract OAuth token BEFORE any ES modules load.
+      // Google redirects with #access_token=...&token_type=Bearer&...
+      // HashRouter also uses # for routing, so we must clean it first.
+      (function() {
+        var hash = window.location.hash;
+        if (hash && hash.indexOf('access_token=') !== -1) {
+          var params = new URLSearchParams(hash.substring(1));
+          var token = params.get('access_token');
+          if (token) {
+            window.__OAUTH_TOKEN__ = token;
+            history.replaceState(null, '', window.location.pathname + '#/');
+          }
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
